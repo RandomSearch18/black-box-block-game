@@ -44,19 +44,16 @@ void main() {
     // wait a bit after the game starts before doing the first drop
     int initial_delay = 0; // 300
     if (clock >= initial_delay && clock % drop_rate == drop_rate - 1) {
-      // Attempt to drop down one pixel
-      int new_y = sprite_y + 1;
-      // Check if the bottom pixel of the sprite would be in a block
-      // or if we've hit the bottom of the screen
-      if (blocks[new_y + 1] & (1 << (7 - sprite_x)) || new_y + 1 == 8) {
+      // Drop down one pixel
+      sprite_y += 1;
+      // Check if we've hit another block, or the bottom of the screen
+      if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
         blocks[sprite_y] |= 1 << (7 - sprite_x);
         blocks[sprite_y + 1] |= 1 << (7 - sprite_x);
         sprite_x = 4;
         sprite_y = 0;
         blackbox.piezo.tone(400);
         tone_ttl = 40;
-      } else {
-        sprite_y += 1;
       }
     }
 
