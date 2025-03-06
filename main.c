@@ -12,6 +12,26 @@ int tone_ttl = -1;
 // Increases by 1 each frame the sprite stays at the same vertical level
 int sprite_boredom = 0;
 
+void you_just_died() {
+  int delay = 500;
+  blackbox.piezo.tone(800);
+  blackbox.matrix.turn_all_on();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(700);
+  blackbox.matrix.turn_all_off();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(600);
+  blackbox.matrix.turn_all_on();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(400);
+  tone_ttl = 200;
+
+  // Reset game
+  for (int i = 0; i < 8; i++) {
+      blocks[i] = 0;
+  }
+}
+
 void sprite_down() {
   // Drop down one pixel
   sprite_y += 1;
@@ -56,26 +76,6 @@ void on_timeout_1() {
 }
 void on_timeout_2() {
   //blackbox.matrix.turn_all_on();
-}
-
-void you_just_died() {
-  int delay = 500;
-  blackbox.piezo.tone(800);
-  blackbox.matrix.turn_all_on();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(700);
-  blackbox.matrix.turn_all_off();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(600);
-  blackbox.matrix.turn_all_on();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(400);
-  tone_ttl = 200;
-
-  // Reset game
-  for (int i = 0; i < 8; i++) {
-      blocks[i] = 0;
-  }
 }
 
 void main() {
