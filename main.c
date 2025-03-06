@@ -11,28 +11,39 @@ int sprite_y = 0;
 int tone_ttl = -1;
 // Increases by 1 each frame the sprite stays at the same vertical level
 int sprite_boredom = 0;
+// 1 while in-game, 0 when in an animation (i.e. death screen)
+int gaming = 1;
+
+void toggle_pixel(int y, int x) {
+    pixels[y] ^= 1; // TODO
+}
 
 void you_just_died() {
   int delay = 500;
-  blackbox.piezo.tone(800);
-  blackbox.matrix.turn_all_on();
-  blackbox.sleep(delay);
+  gaming = 0;
   blackbox.piezo.tone(700);
-  blackbox.matrix.turn_all_off();
+  blackbox.matrix.turn_all_on();
   blackbox.sleep(delay);
   blackbox.piezo.tone(600);
+  blackbox.matrix.turn_all_off();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(500);
   blackbox.matrix.turn_all_on();
   blackbox.sleep(delay);
-  blackbox.piezo.tone(400);
+  blackbox.piezo.tone(350);
   tone_ttl = 200;
 
   // Reset game
   for (int i = 0; i < 8; i++) {
       blocks[i] = 0;
   }
+  gaming = 1;
 }
 
 void sprite_down() {
+  //debyg
+  toggle_pixel(0,0);
+  
   // Drop down one pixel
   sprite_y += 1;
   sprite_boredom = 0;
@@ -54,7 +65,9 @@ void sprite_down() {
 
 void on_up() {}
 void on_down() {
-  sprite_down();
+  if (gaming) {
+   sprite_down(); 
+  }
 }
 void on_left() {
   if (sprite_x <= 0) {
