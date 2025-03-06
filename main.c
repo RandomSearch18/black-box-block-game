@@ -9,10 +9,13 @@ int blocks[8] = {0};
 int sprite_x = 4;
 int sprite_y = 0;
 int tone_ttl = -1;
+// Increases by 1 each frame the sprite stays at the same vertical level
+int sprite_boredom = 0;
 
 void sprite_down() {
   // Drop down one pixel
   sprite_y += 1;
+  sprite_boredom = 0;
   // Check if we've hit another block, or the bottom of the screen
   if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
     blocks[sprite_y] |= 1 << (7 - sprite_x);
@@ -77,12 +80,14 @@ void you_just_died() {
 
 void main() {
   int clock = 0;
+  // How often (in frames) the sprite should drop down
+  int drop_rate = 200;
+  // Wait a bit after the game starts before doing the first drop
+  int initial_delay = 0; // 300
   while (1) {
     // Update data
-    int drop_rate = 200;
-    // Wait a bit after the game starts before doing the first drop
-    int initial_delay = 0; // 300
-    if (clock >= initial_delay && clock % drop_rate == drop_rate - 1) {
+    sprite_boredom++;
+    if (clock >= initial_delay && sprite_boredom >= drop_rate) {
       sprite_down();
     }
 
