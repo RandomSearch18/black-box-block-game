@@ -35,6 +35,25 @@ void on_timeout_2() {
   //blackbox.matrix.turn_all_on();
 }
 
+void you_just_died() {
+  int delay = 500;
+  blackbox.piezo.tone(800);
+  blackbox.matrix.turn_all_on();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(700);
+  blackbox.matrix.turn_all_off();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(600);
+  blackbox.matrix.turn_all_on();
+  blackbox.sleep(delay);
+  blackbox.piezo.tone(400);
+  tone_ttl = 200;
+
+  // Reset game
+  for (int i = 0; i < 8; i++) {
+      blocks[i] = 0;
+  }
+}
 
 void main() {
   int clock = 0;
@@ -50,10 +69,15 @@ void main() {
       if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
         blocks[sprite_y] |= 1 << (7 - sprite_x);
         blocks[sprite_y + 1] |= 1 << (7 - sprite_x);
+        // Respawn the sprite at the top
         sprite_x = 4;
         sprite_y = 0;
-        blackbox.piezo.tone(400);
-        tone_ttl = 40;
+        if (blocks[sprite_y + 1] & (1 << (7 - sprite_x))) {
+          you_just_died();
+        } else {
+          blackbox.piezo.tone(400);
+          tone_ttl = 40;
+        }
       }
     }
 
