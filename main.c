@@ -8,6 +8,7 @@ int pixels[8] = {0};
 int blocks[8] = {0}; 
 int sprite_x = 4;
 int sprite_y = 0;
+int tone_ttl = -1;
 
 // These functions are called when the buttons are pressed
 void on_up() {}
@@ -52,9 +53,17 @@ void main() {
         blocks[sprite_y + 1] |= 1 << (7 - sprite_x);
         sprite_x = 4;
         sprite_y = 0;
+        blackbox.piezo.tone(400);
+        tone_ttl = 40;
       } else {
         sprite_y += 1;
       }
+    }
+
+    // Handle stopping the tone
+    tone_ttl--;
+    if (tone_ttl == 0) {
+      blackbox.piezo.no_tone();
     }
     
     // Draw to screen
