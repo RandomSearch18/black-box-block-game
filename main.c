@@ -10,9 +10,29 @@ int sprite_x = 4;
 int sprite_y = 0;
 int tone_ttl = -1;
 
-// These functions are called when the buttons are pressed
+void sprite_down() {
+  // Drop down one pixel
+  sprite_y += 1;
+  // Check if we've hit another block, or the bottom of the screen
+  if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
+    blocks[sprite_y] |= 1 << (7 - sprite_x);
+    blocks[sprite_y + 1] |= 1 << (7 - sprite_x);
+    // Respawn the sprite at the top
+    sprite_x = 4;
+    sprite_y = 0;
+    if (blocks[sprite_y + 1] & (1 << (7 - sprite_x))) {
+      you_just_died();
+    } else {
+      blackbox.piezo.tone(400);
+      tone_ttl = 40;
+    }
+  }
+}
+
 void on_up() {}
-void on_down() {}
+void on_down() {
+  sprite_down();
+}
 void on_left() {
   if (sprite_x <= 0) {
     sprite_x = 8;
@@ -60,25 +80,10 @@ void main() {
   while (1) {
     // Update data
     int drop_rate = 200;
-    // wait a bit after the game starts before doing the first drop
+    // Wait a bit after the game starts before doing the first drop
     int initial_delay = 0; // 300
     if (clock >= initial_delay && clock % drop_rate == drop_rate - 1) {
-      // Drop down one pixel
-      sprite_y += 1;
-      // Check if we've hit another block, or the bottom of the screen
-      if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
-        blocks[sprite_y] |= 1 << (7 - sprite_x);
-        blocks[sprite_y + 1] |= 1 << (7 - sprite_x);
-        // Respawn the sprite at the top
-        sprite_x = 4;
-        sprite_y = 0;
-        if (blocks[sprite_y + 1] & (1 << (7 - sprite_x))) {
-          you_just_died();
-        } else {
-          blackbox.piezo.tone(400);
-          tone_ttl = 40;
-        }
-      }
+      sprite_down();
     }
 
     // Handle stopping the tone
