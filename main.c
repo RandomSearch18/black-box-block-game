@@ -1,8 +1,8 @@
 #include "blackbox.h"
 
 int clock = 0;
-int pixels[8] = {0};
-int blocks[8] = {0}; 
+uint8_t pixels[8] = {0};
+uint8_t blocks[8] = {0}; 
 int sprite_x = 4;
 int sprite_y = 0;
 int tone_ttl = -1;
@@ -102,9 +102,8 @@ void tick(task_handle self) {
   for (int i = 0; i < 8; i++) {
     pixels[i] = blocks[i];
   }
-  // pixels[sprite_y] |= 1 << (7 - sprite_x);
+  pixels[sprite_y] |= 1 << (7 - sprite_x);
   pixels[sprite_y + 1] |= 1 << (7 - sprite_x);
-  debug_print("%d: %d", sprite_y + 1, pixels[sprite_y + 1]);
   bb_matrix_set_arr(pixels);
   clock++;
   //debug_print("sprite_x=%d, y=%d", sprite_x, sprite_y);
