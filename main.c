@@ -1,9 +1,6 @@
 #include "blackbox.h"
 
-#define BLACKBOX_TIMEOUT_1 1
-#define BLACKBOX_TIMEOUT_2 125
-
-BlackBox* blackbox;
+int clock = 0;
 int pixels[8] = {0};
 int blocks[8] = {0}; 
 int sprite_x = 4;
@@ -14,23 +11,28 @@ int sprite_boredom = 0;
 // 1 while in-game, 0 when in an animation (i.e. death screen)
 int gaming = 1;
 
+// How often (in frames) the sprite should drop down
+int drop_rate = 200;
+// Wait a bit after the game starts before doing the first drop
+int initial_delay = 0; // 300
+
 void toggle_pixel(int y, int x) {
-    pixels[y] ^= 1; // TODO
+    // pixels[y] ^= 1;
 }
 
 void you_just_died() {
   int delay = 500;
   gaming = 0;
-  blackbox.piezo.tone(700);
-  blackbox.matrix.turn_all_on();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(600);
-  blackbox.matrix.turn_all_off();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(500);
-  blackbox.matrix.turn_all_on();
-  blackbox.sleep(delay);
-  blackbox.piezo.tone(350);
+  bb_tone(700);
+  bb_matrix_all_on();
+  // blackbox.sleep(delay);
+  bb_tone(600);
+  bb_matrix_all_off();
+  // blackbox.sleep(delay);
+  bb_tone(500);
+  bb_matrix_all_on();
+  // blackbox.sleep(delay);
+  bb_tone(350);
   tone_ttl = 200;
 
   // Reset game
@@ -57,66 +59,60 @@ void sprite_down() {
     if (blocks[sprite_y + 1] & (1 << (7 - sprite_x))) {
       you_just_died();
     } else {
-      blackbox.piezo.tone(400);
+      bb_tone(400);
       tone_ttl = 40;
     }
   }
 }
 
-void on_up() {}
-void on_down() {
+void on_up(task_handle self) {}
+void on_down(task_handle self) {
   if (gaming) {
    sprite_down(); 
   }
 }
-void on_left() {
+void on_left(task_handle self) {
   if (sprite_x <= 0) {
     sprite_x = 8;
   }
   sprite_x -= 1;
 }
-void on_right() {
+void on_right(task_handle self) {
   if (sprite_x >= 7) {
     sprite_x = -1;
   }
   sprite_x += 1;
 }
-void on_select() {}
+void on_select(task_handle self) {}
 
-// These functions are called repeatedly
-void on_timeout_1() {
-  //blackbox.matrix.turn_all_on();
-}
-void on_timeout_2() {
-  //blackbox.matrix.turn_all_on();
-}
-
-void main() {
-  int clock = 0;
-  // How often (in frames) the sprite should drop down
-  int drop_rate = 200;
-  // Wait a bit after the game starts before doing the first drop
-  int initial_delay = 0; // 300
-  while (1) {
-    // Update data
-    sprite_boredom++;
-    if (clock >= initial_delay && sprite_boredom >= drop_rate) {
-      sprite_down();
-    }
-
-    // Handle stopping the tone
-    tone_ttl--;
-    if (tone_ttl == 0) {
-      blackbox.piezo.no_tone();
-    }
-    
-    // Draw to screen
-    for (int i = 0; i < 8; i++) {
-      pixels[i] = blocks[i];
-    }
-    pixels[sprite_y] |= 1 << (7 - sprite_x);
-    pixels[sprite_y + 1] |= 1 << (7 - sprite_x);    
-    blackbox.matrix.set_from_integers(pixels);
-    clock++;
+void tick(task_handle self) {
+  // Update data
+  sprite_boredom++;
+  if (clock >= initial_delay && sprite_boredom >= drop_rate) {
+    sprite_down();
   }
+
+  // Handle stopping the tone
+  tone_ttl--;
+  if (tone_ttl == 0) {
+    bb_tone_off();
+  }
+  
+  // Draw to screen
+  for (int i = 0; i < 8; i++) {
+    pixels[i] = blocks[i];
+  }
+  pixels[sprite_y] |= 1 << (7 - sprite_x);
+  pixels[sprite_y + 1] |= 1 << (7 - sprite_x);    
+  bb_matrix_set_arr(pixels);
+  clock++;
+}
+
+void setup() {
+  task_create_interval(tick, 33);
+  task_create_event(on_up, EVENT_PRESS_UP);
+  task_create_event(on_down, EVENT_PRESS_DOWN);
+  task_create_event(on_left, EVENT_PRESS_LEFT);
+  task_create_event(on_right, EVENT_PRESS_RIGHT);
+  task_create_event(on_select, EVENT_PRESS_SELECT);
 }
