@@ -102,14 +102,16 @@ void tick(task_handle self) {
   for (int i = 0; i < 8; i++) {
     pixels[i] = blocks[i];
   }
-  pixels[sprite_y] |= 1 << (7 - sprite_x);
-  pixels[sprite_y + 1] |= 1 << (7 - sprite_x);    
+  // pixels[sprite_y] |= 1 << (7 - sprite_x);
+  pixels[sprite_y + 1] |= 1 << (7 - sprite_x);
+  debug_print("%d: %d", sprite_y + 1, pixels[sprite_y + 1]);
   bb_matrix_set_arr(pixels);
   clock++;
+  //debug_print("sprite_x=%d, y=%d", sprite_x, sprite_y);
 }
 
 void setup() {
-  task_create_interval(tick, 33);
+  task_create_interval(tick, 100);
   task_create_event(on_up, EVENT_PRESS_UP);
   task_create_event(on_down, EVENT_PRESS_DOWN);
   task_create_event(on_left, EVENT_PRESS_LEFT);
