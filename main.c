@@ -10,6 +10,10 @@ int tone_ttl = -1;
 int sprite_boredom = 0;
 // 1 while in-game, 0 when in an animation (i.e. death screen)
 int gaming = 1;
+// 1 if the user has interacted (pressed any button) this round, 0 if the user's AFK
+int has_interacted = 1;
+// The Black Box will go to sleep (LEDs off, no gameplay) if there's no interaction for a whole round
+int sleeping = 0;
 
 // How often (in frames) the sprite should drop down
 int drop_rate = 6;
@@ -30,6 +34,11 @@ void do_flash_screen(uint32_t task_handle) {
     bb_matrix_all_off();
     flash_screen_state = 0;
     gaming = 1;
+    if (!has_interacted) {
+      // If the user hasn't touched the buttons all round, go to sleep
+      gaming = 0;
+      sleeping = 1;
+    }
     return;
   }
   if (flash_screen_state == 0) {
@@ -58,18 +67,13 @@ void you_just_died() {
   for (int i = 0; i < 8; i++) {
       blocks[i] = 0;
   }
+  has_interacted = 0;
 
   // Show the animation
   flash_screen(500, 6);
 }
 
-void sprite_down() {
-  //debug
-  toggle_pixel(0,0);
-  
-  // Drop down one pixel
-  sprite_y += 1;
-  sprite_boredom = 0;
+void check_collision() {
   // Check if we've hit another block, or the bottom of the screen
   if (blocks[sprite_y + 2] & (1 << (7 - sprite_x)) || sprite_y + 1 == 7) {
     blocks[sprite_y] |= 1 << (7 - sprite_x);
@@ -89,25 +93,44 @@ void sprite_down() {
   }
 }
 
-void on_up(task_handle self) {}
+void sprite_down() {
+  //debug
+  toggle_pixel(0,0);
+  
+  // Drop down one pixel
+  sprite_y += 1;
+  sprite_boredom = 0;
+  check_collision();
+}
+
+void on_up(task_handle self) {
+  has_interacted = 1;
+}
 void on_down(task_handle self) {
+  has_interacted = 1;
   if (gaming) {
-   sprite_down(); 
+   sprite_down();
   }
 }
 void on_left(task_handle self) {
+  has_interacted = 1;
   if (sprite_x <= 0) {
     sprite_x = 8;
   }
   sprite_x -= 1;
+  check_collision();
 }
 void on_right(task_handle self) {
+  has_interacted = 1;
   if (sprite_x >= 7) {
     sprite_x = -1;
   }
   sprite_x += 1;
+  check_collision();
 }
-void on_select(task_handle self) {}
+void on_select(task_handle self) {
+  has_interacted = 1;
+}
 
 void tick(task_handle self) {
   // Handle stopping the tone
