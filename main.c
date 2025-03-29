@@ -73,6 +73,10 @@ void you_just_died() {
     blocks[i] = 0;
   }
 
+  // Play a sad sound
+  bb_tone(350);
+  tone_ttl = 8;
+
   // Show the animation
   flash_screen(500, 6);
 }
@@ -92,7 +96,7 @@ void check_collision() {
       you_just_died();
     } else {
       bb_tone(400);
-      tone_ttl = 40;
+      tone_ttl = 2;
     }
   }
 }
