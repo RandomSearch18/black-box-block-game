@@ -106,6 +106,14 @@ void sprite_down() {
 
 void on_interaction() {
   has_interacted = 1;
+  if (sleeping) {
+    // Time to wake up!
+    // If we're sleeping, we're already ready to start a new round
+    // i.e. the board is already clear
+    // So we just tell the tick loop to start ticking again
+    sleeping = 0;
+    gaming = 1;
+  }
 }
 
 void on_up(task_handle self) {
