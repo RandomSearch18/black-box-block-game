@@ -156,12 +156,21 @@ void on_right(task_handle self) {
 void on_select(task_handle self) {
   on_interaction();
 }
-
 void tick(task_handle self) {
   // Handle stopping the tone
   tone_ttl--;
   if (tone_ttl == 0) {
     bb_tone_off();
+  }
+
+  if (sleeping) {
+    // Blink the status LED to show we're alive
+    if (clock % 8 == 0) {
+      bb_matrix_set_pos(7, 7, LED_ON);
+    }
+    else if (clock % 8 == 1) {
+      bb_matrix_set_pos(7, 7, LED_OFF);
+    }
   }
 
   if (!gaming) {
