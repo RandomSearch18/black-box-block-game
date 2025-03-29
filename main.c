@@ -20,10 +20,6 @@ int drop_rate = 6;
 // Wait a bit after a new piece is spawned before doing the first drop (in frames)
 int initial_delay = 10;
 
-void toggle_pixel(int y, int x) {
-    // pixels[y] ^= 1;
-}
-
 int remaining_flashes = 0;
 int flash_screen_state = 0;
 int flash_screen_delay = 500;
@@ -102,9 +98,6 @@ void check_collision() {
 }
 
 void sprite_down() {
-  //debug
-  toggle_pixel(0,0);
-  
   // Drop down one pixel
   sprite_y += 1;
   sprite_boredom = 0;
