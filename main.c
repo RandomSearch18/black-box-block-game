@@ -11,7 +11,7 @@ int sprite_boredom = 0;
 // 1 while in-game, 0 when in an animation (i.e. death screen)
 int gaming = 1;
 // 1 if the user has interacted (pressed any button) this round, 0 if the user's AFK
-int has_interacted = 1;
+int has_interacted = 0;
 // The Black Box will go to sleep (LEDs off, no gameplay) if there's no interaction for a whole round
 int sleeping = 0;
 
@@ -157,6 +157,9 @@ void on_select(task_handle self) {
   on_interaction();
 }
 void tick(task_handle self) {
+  // Update clock
+  clock++;
+  
   // Handle stopping the tone
   tone_ttl--;
   if (tone_ttl == 0) {
@@ -165,11 +168,13 @@ void tick(task_handle self) {
 
   if (sleeping) {
     // Blink the status LED to show we're alive
-    if (clock % 8 == 0) {
-      bb_matrix_set_pos(7, 7, LED_ON);
+    const int INTERVAL = 50;
+    const int DURATION = 2;
+    if (clock % INTERVAL == 0) {
+      bb_matrix_set_pos(7, 7, 1);
     }
-    else if (clock % 8 == 1) {
-      bb_matrix_set_pos(7, 7, LED_OFF);
+    else if (clock % INTERVAL == DURATION) {
+      bb_matrix_set_pos(7, 7, 0);
     }
   }
 
@@ -189,9 +194,8 @@ void tick(task_handle self) {
   }
   pixels[sprite_y] |= 1 << (7 - sprite_x);
   pixels[sprite_y + 1] |= 1 << (7 - sprite_x);
-  debug_print("%d: %d", sprite_y + 1, pixels[sprite_y + 1]);
+  //debug_print("%d: %d", sprite_y + 1, pixels[sprite_y + 1]);
   bb_matrix_set_arr(pixels);
-  clock++;
   //debug_print("sprite_x=%d, y=%d", sprite_x, sprite_y);
 }
 
