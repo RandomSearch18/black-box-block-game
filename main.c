@@ -39,6 +39,8 @@ void do_flash_screen(uint32_t task_handle) {
       gaming = 0;
       sleeping = 1;
     }
+    // Ready for tracking the interactions next round
+    has_interacted = 0;
     return;
   }
   if (flash_screen_state == 0) {
@@ -67,7 +69,6 @@ void you_just_died() {
   for (int i = 0; i < 8; i++) {
       blocks[i] = 0;
   }
-  has_interacted = 0;
 
   // Show the animation
   flash_screen(500, 6);
