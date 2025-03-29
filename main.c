@@ -34,6 +34,9 @@ void do_flash_screen(uint32_t task_handle) {
     bb_matrix_all_off();
     flash_screen_state = 0;
     gaming = 1;
+    // Reset the clock here because it's immediately before the round begins
+    // (the `pixels` array has already been reset)
+    clock = 0;
     if (!has_interacted) {
       // If the user hasn't touched the buttons all round, go to sleep
       gaming = 0;
@@ -67,7 +70,7 @@ void flash_screen(int delay, int repetitions) {
 void you_just_died() {
   // Reset game
   for (int i = 0; i < 8; i++) {
-      blocks[i] = 0;
+    blocks[i] = 0;
   }
 
   // Show the animation
@@ -113,6 +116,7 @@ void on_interaction() {
     // So we just tell the tick loop to start ticking again
     sleeping = 0;
     gaming = 1;
+    clock = 0;
   }
 }
 
@@ -120,26 +124,30 @@ void on_up(task_handle self) {
   on_interaction();
 }
 void on_down(task_handle self) {
-  on_interaction();
   if (gaming) {
-   sprite_down();
+    sprite_down();
   }
+  on_interaction();
 }
 void on_left(task_handle self) {
-  on_interaction();
-  if (sprite_x <= 0) {
-    sprite_x = 8;
+  if (gaming) {
+    if (sprite_x <= 0) {
+      sprite_x = 8;
+    }
+    sprite_x -= 1;
+    check_collision();
   }
-  sprite_x -= 1;
-  check_collision();
+  on_interaction();
 }
 void on_right(task_handle self) {
-  on_interaction();
-  if (sprite_x >= 7) {
-    sprite_x = -1;
+  if (gaming) {
+    if (sprite_x >= 7) {
+      sprite_x = -1;
+    }
+    sprite_x += 1;
+    check_collision();
   }
-  sprite_x += 1;
-  check_collision();
+  on_interaction();
 }
 void on_select(task_handle self) {
   on_interaction();
