@@ -103,17 +103,21 @@ void sprite_down() {
   check_collision();
 }
 
-void on_up(task_handle self) {
+void on_interaction() {
   has_interacted = 1;
 }
+
+void on_up(task_handle self) {
+  on_interaction();
+}
 void on_down(task_handle self) {
-  has_interacted = 1;
+  on_interaction();
   if (gaming) {
    sprite_down();
   }
 }
 void on_left(task_handle self) {
-  has_interacted = 1;
+  on_interaction();
   if (sprite_x <= 0) {
     sprite_x = 8;
   }
@@ -121,7 +125,7 @@ void on_left(task_handle self) {
   check_collision();
 }
 void on_right(task_handle self) {
-  has_interacted = 1;
+  on_interaction();
   if (sprite_x >= 7) {
     sprite_x = -1;
   }
@@ -129,7 +133,7 @@ void on_right(task_handle self) {
   check_collision();
 }
 void on_select(task_handle self) {
-  has_interacted = 1;
+  on_interaction();
 }
 
 void tick(task_handle self) {
