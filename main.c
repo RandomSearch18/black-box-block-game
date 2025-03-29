@@ -13,8 +13,8 @@ int gaming = 1;
 
 // How often (in frames) the sprite should drop down
 int drop_rate = 6;
-// Wait a bit after the game starts before doing the first drop
-int initial_delay = 0; // 300
+// Wait a bit after a new piece is spawned before doing the first drop (in frames)
+int initial_delay = 10;
 
 void toggle_pixel(int y, int x) {
     // pixels[y] ^= 1;
@@ -77,6 +77,8 @@ void sprite_down() {
     // Respawn the sprite at the top
     sprite_x = 4;
     sprite_y = 0;
+    // Reset the clock to give the player a bit of time before the first movement of the block
+    clock = 0;
     if (blocks[sprite_y + 1] & (1 << (7 - sprite_x))) {
       gaming = 0;
       you_just_died();
